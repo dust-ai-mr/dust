@@ -12,21 +12,21 @@ has been created - both implement the Thread class. While this makes the transit
 thread-poor to a thread-rich environment easy, it was not designed to change any aspect of 
 thread management. 
 
-That is needed is a different model for creating programs - one that exploits the ability to have
+What is needed is a different model for creating programs - one that exploits the ability to have
 an application with one million concurrent threads, but one in which thread management (and all
 that implies) sinks back into the framework where it belongs.
 
 At least one such model exists.
 
 ## Actors
-The idea of Actors is not new - indeed it was described in the 1970s (<a href="https://arxiv.org/pdf/1008.1459">link</a>).
+The idea of Actors is not new - indeed it was first described in the 1970s (<a href="https://arxiv.org/pdf/1008.1459">link</a>).
 Variations of the Actor model have been implemented as languages (Erlang, Elixir) and frameworks (Akka).
-While the implementations may vary there is a common underlying model:
-* Applications are built up out of _Actors_
-* An Actor is cheap to create and destroy
+While the implementations may vary there is a quite a degree of commonality:
+* Applications are built up out of _Actors_. Usually it is 'Actors all the way down'.
+* An Actor is cheap to create and destroy.
 * An Actor accepts _messages_ and sends messages to other Actors. This is the only way
 an Actor communicates with the world outside of it.
-* An Actor has internal state which is inaccessible outside of the Actor. 
+* An Actor may have internal state which is always inaccessible outside of the Actor. 
 It may mutate this state as it receives messages.
 * What an Actor does in response to a message is called its behavior. Part of an Actor's behavior 
 can be to change its response to subsequent message i.e. change it behavior.
@@ -44,6 +44,9 @@ virtual thread to be suspended, but by the design of Java 21 this _does not bloc
 the underlying platform thread. Consequently there is no processing cost to simply waiting. Actors can
 wait for months or years if the application needs it.
 
+This starts to turn applications development on its head, and often biological comparisons are made. 
+For instance thousands upon thousands of Ants can work together to solve problems, but there is no 'master ant' - 
+the ants are constantly sending (chemical) messages to each other and problem solving is an _emergent_ _behavior_.
 
 ## The Dust Actor Framework
 Dust is a lightweight implementation of Actors for Java 21 and beyond. It manages the creation of 
@@ -67,7 +70,7 @@ public class LogActor extends Actor {
      */
     public static Props props() { return Props.create(LogActor.class); }
     /**
-     * Default behavior - every message is logged. Most Actors will do a switch() (or branch) on message.class
+     * Default behavior - just log every message. More complex Actors typically do a switch() (or branch) on message.class
      * to handle different messages differently.
      */
     @Override
@@ -92,7 +95,7 @@ Dust consists of a number of different repos
 
 <a href="https://github.com/dust-ai-mr/dust-core">dust-core</a> - the heart and soul of Dust. Actor creation, 
 persistence and lifecycle management along with a large collection of Actors to enable the easy creation of 
-applications in _idiomatic_ dust. Entity Actors to support digital twinning and modeling. Extensive documentation
+applications in _idiomatic_ Dust. Entity Actors to support digital twinning and modeling. Extensive documentation
 <a href="https://github.com/dust-ai-mr/dust-core/blob/main/docs/dust-core-1.0.1.pdf">here</a>.
 
 <a href="https://github.com/dust-ai-mr/dust-http">dust-http</a> - Actors for creating HttpClients and interacting with
@@ -113,7 +116,7 @@ be adapted to other APIs.)
 ## But what is it good for?
 A question that should be answered is 'what kinds of applications is Dust good for?'. Following is a list of 
 rules-of-thumb for recognizing possible good fits. As it happens, dust (or its predecessor) has been used in 
-such applications.
+many such applications.
 * Digital twinning and event-based simulations - according to McKinsey 
 "A digital twin is a digital replica of a physical object, person, system, or process, 
 contextualized in a digital version of its environment. Digital twins can help many kinds of organizations
@@ -124,22 +127,34 @@ simple and straightforward. Actor messages determine how the various entities in
 
 A very simple example of twinning/simulation can be found at <a href="https://github.com/dust-ai-mr/dust-ville">dust-ville</a>
 
-
-
-  
 * Dynamic Focus - change the details of ongoing monitoring based on the contents of the data stream.
-  * Monitor business news feeds for company mentions. If there is an uptick in mentions of a particular product
+  For instance, Monitor business news feeds for company mentions. If there is an uptick in mentions of a particular product
   then add this product to things to watch more closely. As the mentions fall off stop this deeper monitoring.
   A system was built using Dust's predecessor to do just this:
   
-  <img src="/xray.png"/>
   
-  * Network monitoring detects an anomaly at a server. Turn on deeper packet inspection on all routes into
-  the server until the anomaly has been understood and mitigated.
+  <img src="/xray.png"/>
 
 
-     
-* Sophisticated workflows
+* Sophisticated workflows - a medical non-profit provides science-based advice for late stage Cancer patients. 
+There is a workflow 
+associated with these patients - a patient may send in an email with a question or update, or a scientist may want to 
+periodically check in with the patient (or caregiver) to see how they are responding to treatments or get test scores etc.
+
+  Conventionally these would be regarded as two different things, with two different paths through the system. But this
+platform runs on Dust and so we create an Entity Actor for the patient when they register. These Actors 'know' to catch
+up with the patient every three months, and so every three months they send themselves a message (messages can be scheduled
+years in advance) which causes Actors representing the clinical description of the patient to be queried to see if the
+data is available. If not the appropriate email is generated and sent off - otherwise another message is scheduled for 
+three months down the road.
+
+  Incoming emails from a patient are simply converted to messages and sent to the patient's 'twin'. Using the LLM 
+capabilities of Dust the email is read and analyzed. Perhaps it is a score update - so the score is updated automatically,
+perhaps it is a question - in which case it is sent to an Actor twinning the scientist helping that patient.
+
+As we said - it's Actors all the way down. 
+
+Feel free to clone, fork and enjoy.
 
 
 
