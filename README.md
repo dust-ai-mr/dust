@@ -113,6 +113,10 @@ interact with OpenAI and Ollama LLMs (and a generic Actor for OpenAI-like apis w
 other providers). Actors for chunking text and creating embeddings (Huggingface embedding but again can easily
 be adapted to other APIs.) 
 
+<a href="https://github.com/dust-ai-mr/dust-demos-topics">dust-demos-topics</a> - Uses the above modules to construct an 
+intelligent news reader which finds RSS feeds based on your interests and extracts they types of information that you 
+specify from published news articles. Uses ChatGPT in multiple ways.
+
 ## But what is it good for?
 A question that should be answered is 'what kinds of applications is Dust good for?'. Following is a list of 
 rules-of-thumb for recognizing possible good fits. As it happens, dust (or its predecessor) has been used in 
@@ -151,6 +155,8 @@ three months down the road.
   Incoming emails from a patient are simply converted to messages and sent to the patient's 'twin'. Using the LLM 
 capabilities of Dust the email is read and analyzed. Perhaps it is a score update - so the score is updated automatically,
 perhaps it is a question - in which case it is sent to an Actor twinning the scientist helping that patient.
+
+* As mentioned above, an intelligent LLM-based news reader. 
 
 As we said - it's Actors all the way down. 
 
