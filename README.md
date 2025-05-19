@@ -1,4 +1,4 @@
-# Dust
+# Dust - Latest Version 1.1.5 (May 2025)
 Java 21 saw the introduction of virtual threads into Java which allows creation of Java programs 
 comprised of tens of thousands (or more) of threads.
 
